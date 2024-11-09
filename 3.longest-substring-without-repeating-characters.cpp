@@ -17,22 +17,24 @@ public:
     int lengthOfLongestSubstring(string s)
     {
 
-        vector<int> characters(256, -1);
+        vector<int> characters(128, -1);
         int longestLength = 0, length = s.length(), currentLength = 0;
 
         for (int i = 0; i < length; i++)
         {
-            if (characters[(int)s[i]] != -1)
+            if (characters[s[i]] != -1)
             {
-                longestLength = max(longestLength, currentLength);
+                if (currentLength > longestLength)
+                    longestLength = currentLength;
+
                 currentLength = 0;
-                i = characters[(int)s[i]];
+                i = characters[s[i]];
                 fill(characters.begin(), characters.end(), -1);
             }
             else
             {
                 currentLength++;
-                characters[(int)s[i]] = i;
+                characters[s[i]] = i;
             }
         }
         longestLength = max(longestLength, currentLength);
