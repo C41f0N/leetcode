@@ -20,31 +20,28 @@ using namespace std;
 class Solution
 {
 public:
-    float getMedian(vector<int> &v)
+    float getMedian(vector<int> &v, int left, int right)
     {
-        if (v.size() % 2 == 0)
+        if (left > right)
         {
-            return (float)(v[v.size() / 2] + v[(v.size() / 2) - 1]) / 2;
+            return 0;
+        }
+
+        if ((right - left + 1) % 2 == 0)
+        {
+            return (float)((v[left + (right - left + 1) / 2]) + (v[left + (right - left + 1) / 2 - 1])) / 2;
         }
         else
         {
-            return (float)(v[v.size() / 2]);
+            return (float)(v[left + (right - left) / 2]);
         }
     }
 
-    int getLowestClosest(vector<int> v, int left, int right, int value)
+    int findIndexStartingFrom(vector<int> list, int left, int right, float num)
     {
-        if (left + 1 == right || left >= right)
+        if (left > right)
         {
-            if (v[left] == value)
-            {
-                return left;
-            }
-            else if (v[right] == value)
-            {
-                return right;
-            }
-            else if (v[right] < value)
+            if (list[right] > num)
             {
                 return right;
             }
@@ -56,36 +53,27 @@ public:
         else
         {
             int mid = left + (right - left) / 2;
-            if (value == v[mid])
+
+            if (list[mid] == num)
             {
                 return mid;
             }
-            else if (value > v[mid])
+            else if (list[mid] < num)
             {
-                cout << v[mid] << " smaller than " << value << endl;
-                return getLowestClosest(v, mid, right, value);
+                return findIndexStartingFrom(list, mid + 1, right, num);
             }
             else
             {
-                cout << v[mid] << " larger than " << value << endl;
-                return getLowestClosest(v, left, mid, value);
+                return findIndexStartingFrom(list, left, mid - 1, num);
             }
         }
     }
 
-    int getHighestClosest(vector<int> v, int left, int right, int value)
+    int findIndexEndingFrom(vector<int> list, int left, int right, float num)
     {
-        if (left + 1 == right || left >= right)
+        if (left > right)
         {
-            if (v[left] == value)
-            {
-                return left;
-            }
-            else if (v[right] == value)
-            {
-                return right;
-            }
-            else if (v[right] > value)
+            if (list[left] > num)
             {
                 return right;
             }
@@ -97,60 +85,79 @@ public:
         else
         {
             int mid = left + (right - left) / 2;
-            if (value > v[mid])
+
+            if (list[mid] == num)
             {
-                return getHighestClosest(v, mid, right, value);
+                return mid;
+            }
+            else if (list[mid] < num)
+            {
+                return findIndexEndingFrom(list, mid + 1, right, num);
             }
             else
             {
-                return getHighestClosest(v, left, mid, value);
+                return findIndexEndingFrom(list, left, mid - 1, num);
             }
+        }
+    }
+
+    float median2Arrays(vector<int> &array1, vector<int> &array2, int array1Left, int array1Right, int array2Left, int array2Right)
+    {
+
+        int m = array1Right - array1Left + 1;
+        int n = array2Right - array2Left + 1;
+
+        if (m + n <= 2)
+        {
+            int sum = 0;
+            for (int i = array1Left; i <= array1Right; i++)
+            {
+                sum += array1[i];
+            }
+
+            for (int i = array2Left; i <= array2Right; i++)
+            {
+                sum += array2[i];
+            }
+
+            // Extract median from remaining list
+            if (m + n == 2)
+            {
+                // cout << sum << " " << endl;
+                return (float)(sum / 2);
+            }
+            else
+            {
+                return sum;
+            }
+        }
+        else
+        {
+            float m1 = getMedian(array1, array1Left, array1Right);
+            float m2 = getMedian(array2, array2Left, array2Right);
+
+            if (m1 == 0)
+            {
+                m1 = m2;
+            }
+
+            if (m2 == 0)
+            {
+                m2 = m1;
+            }
+
+            if (m1 > m2)
+            {
+                swap(m1, m2);
+            }
+
+            return median2Arrays(array1, array2, findIndexStartingFrom(array1, array1Left, array1Right, m1), findIndexEndingFrom(array1, array1Left, array1Right, m2), findIndexStartingFrom(array2, array2Left, array2Right, m1), findIndexEndingFrom(array2, array2Left, array2Right, m2));
         }
     }
 
     double findMedianSortedArrays(vector<int> &nums1, vector<int> &nums2)
     {
-        // Get median of both
-        double med1 = getMedian(nums1);
-        double med2 = getMedian(nums2);
-
-        cout << "The median is between " << med1 << " and " << med2 << endl;
-
-        int left1, right1, left2, right2;
-
-        if (med1 < med2)
-        {
-            left1 = getHighestClosest(nums1, 0, nums1.size() - 1, ceil(med1));
-            right2 = getLowestClosest(nums2, 0, nums2.size() - 1, floor(med2));
-            right1 = getLowestClosest(nums1, med1, nums1.size() - 1, floor(med2));
-            left2 = getHighestClosest(nums2, 0, med2, ceil(med1));
-        }
-        else
-        {
-            left2 = getHighestClosest(nums2, 0, nums2.size() - 1, ceil(med2));
-            right1 = getLowestClosest(nums1, 0, nums1.size() - 1, floor(med1));
-            right2 = getLowestClosest(nums2, med2, nums2.size() - 1, floor(med1));
-            left1 = getHighestClosest(nums1, 0, med1, ceil(med2));
-        }
-        cout << "left1: " << left1 << " right1: " << right1 << endl;
-        cout << "left2: " << left2 << " right2: " << right2 << endl;
-
-        // printing the numbers in range
-        cout << "in nums1: ";
-        for (int i = left1; i <= right1; i++)
-        {
-            cout << nums1[i] << " ";
-        }
-        cout << endl;
-
-        cout << "in nums2: ";
-        for (int i = left2; i <= right2; i++)
-        {
-            cout << nums2[i] << " ";
-        }
-        cout << endl;
-
-        return 0.2;
+        return median2Arrays(nums1, nums2, 0, nums1.size() - 1, 0, nums2.size() - 1);
     }
 };
 // @lc code=end
@@ -159,10 +166,10 @@ int main()
 {
     Solution s;
 
-    vector<int> nums1 = {1, 3, 4, 20};
-    vector<int> nums2 = {1, 2, 4, 5, 6, 12};
+    vector<int> nums1 = {1, 2};
+    vector<int> nums2 = {3, 4};
 
-    cout << s.findMedianSortedArrays(nums1, nums2) << endl;
+    cout << "Median is " << s.findMedianSortedArrays(nums1, nums2) << endl;
 
     for (int i = 0; i < nums2.size(); i++)
     {
@@ -177,5 +184,5 @@ int main()
     }
     cout << endl;
 
-    cout << "Median should be: " << s.getMedian(nums1) << endl;
+    cout << "Median should be: " << s.getMedian(nums1, 0, nums1.size() - 1) << endl;
 }
