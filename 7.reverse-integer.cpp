@@ -13,7 +13,6 @@ class Solution
 public:
     long int reverse(long int x)
     {
-        cout << x << endl;
         long int xx = x;
 
         bool sign = x < 0;
@@ -96,7 +95,7 @@ public:
             }
         }
 
-        cout << s << endl;
+        // cout << s << endl;
 
         long int res = 0;
         // Converting string back to int
@@ -104,25 +103,11 @@ public:
         {
             if (sign)
             {
-                long tenpow = 1;
-                long charr = s[i];
-                for (int j = 0; j < s.length() - 1 - i; j++)
-                {
-                    tenpow *= 10;
-                }
-                res -= (charr - '0') * tenpow;
+                res -= (s[i] - '0') * pow(10, s.length() - 1 - i);
             }
             else
             {
-                long tenpow = 1;
-                long charr = s[i];
-                for (int j = 0; j < s.length() - 1 - i; j++)
-                {
-                    tenpow *= 10;
-                }
-                // cout << tenpow << endl;
-
-                res += (charr - '0') * tenpow;
+                res += (s[i] - '0') * pow(10, s.length() - 1 - i);
             }
         }
 
